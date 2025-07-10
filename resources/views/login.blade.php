@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Website App</title>
+    <title>Login - Software App</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -12,7 +12,7 @@
 <body class="bg-gray-50">
     <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Website App</h2>
+            <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Software App</h2>
             <p class="text-center">Login Form</p>
         </div>
 
