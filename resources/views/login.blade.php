@@ -51,6 +51,83 @@
             </div>
         </div>
     </div>
+    <div id="sso-popup" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 class="text-lg font-medium mb-4">Select Email to Login</h3>
+            <div id="email-options" class="space-y-2 mb-4">
+                <!-- Email options will be populated here -->
+                <div class="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer email-option"
+                    data-email="admin@example.com">
+                    <span class="ml-2">admin@example.com</span>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button id="cancel-sso" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Cancel</button>
+                <button id="confirm-sso"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Continue</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function() {
+            let selectedEmail = null;
+
+            // Handle email selection
+            $(document).on('click', '.email-option', function() {
+                $('.email-option').removeClass('bg-blue-300 hover:bg-gray-100');
+                $(this).addClass('bg-blue-300');
+                selectedEmail = $(this).data('email');
+            });
+
+            // Cancel SSO
+            $('#cancel-sso').click(function() {
+                $('#sso-popup').addClass('hidden');
+                $('#sso-login-btn').prop('disabled', false).text('Login with Website App');
+            });
+
+            // Confirm SSO with selected email
+            $('#confirm-sso').click(async function() {
+                if (!selectedEmail) {
+                    alert('Please select an email');
+                    return;
+                }
+
+                $('#sso-popup').addClass('hidden');
+                await initiateSSO(selectedEmail);
+            });
+
+            $('#sso-login-btn').click(async function() {
+                const token = localStorage.getItem('access_token');
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Redirecting...');
+
+                if (!token) {
+                    // Show popup to select email
+                    $('#sso-popup').removeClass('hidden');
+                    return;
+                }
+
+                await initiateSSO();
+            });
+
+            async function initiateSSO(email = null) {
+                const $btn = $('#sso-login-btn');
+
+                // Step 1: Initiate SSO from website-app
+                const response = await fetch(`http://website-app.test/sso-initiate/${email}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error("SSO Initiate Failed");
+                }
+                const { token } = await response.json();
+                alert("SSO Token received from website-app: " + token);
+            }
+        });
+    </script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -113,52 +190,5 @@
         }
     </script>
 
-    <script>
-        $(document).ready(function() {
-            $('#sso-login-btn').click(async function() {
-                const $btn = $(this);
-                $btn.prop('disabled', true).text('Redirecting...');
-
-                // Step 1: Initiate SSO from website-app
-                const response = await fetch('http://website-app.test/sso-initiate', {
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error("SSO Initiate Failed");
-                }
-
-                const {
-                    token
-                } = await response.json();
-                alert("SSO Token received from website-app:", token);
-
-                if (token) {
-                    throw new Error('Token received');
-                }
-
-                // Step 2: Continue with your software-app login flow
-                const loginResponse = await fetch('/api/sso-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        token
-                    })
-                });
-
-                if (!loginResponse.ok) {
-                    const error = await loginResponse.json();
-                    throw new Error(error.message || 'Login failed');
-                }
-
-                // Step 3: Redirect to dashboard on success
-                window.location.href = '/dashboard';
-            });
-        });
-    </script>
 </body>
-
 </html>
