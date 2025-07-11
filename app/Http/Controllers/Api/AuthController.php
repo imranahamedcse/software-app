@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -38,13 +39,19 @@ class AuthController extends Controller
         if ($request->user()?->token()) {
             $request->user()->token()->revoke();
 
-            // $token = session('sso_access_token');
-            // if ($token) {
-            //     Http::withToken($token)->post('http://website-app.test/api/logout');
-            // }
-
             return response()->json(['message' => 'Token revoked']);
         }
         return response()->json(['message' => 'No token found'], 400);
     }
+
+
+    // $user = User::updateOrCreate(
+    //     ['email' => $userData['email']],
+    //     [
+    //         'name' => $userData['name'],
+    //         'password' => Hash::make(123456)
+    //     ]
+    // );
+    // Auth::login($user);
+    // return redirect('/dashboard');
 }

@@ -22,7 +22,7 @@
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                         <div class="mt-1">
-                            <input id="email" name="email" type="email" required
+                            <input id="email" name="email" type="email" value="admin@example.com" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         </div>
                     </div>
@@ -30,7 +30,7 @@
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                         <div class="mt-1">
-                            <input id="password" name="password" type="password" required
+                            <input id="password" name="password" type="password" value="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         </div>
                     </div>
@@ -70,6 +70,8 @@
     </div>
 
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
         $(document).ready(function() {
             let selectedEmail = null;
@@ -121,16 +123,31 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error("SSO Initiate Failed");
+                    toastr.error("SSO Initiate Failed");
+                } else {
+                    const {
+                        token
+                    } = await response.json();
+                    const res = await fetch("http://website-app.test/api/user", {
+                        headers: {
+                            "Authorization": "Bearer " + token,
+                        }
+                    });
+                    if (res.ok) {
+                        toastr.success('Login successfully.');
+                        localStorage.setItem('access_token', token);
+                        setTimeout(function() {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } else {
+                        toastr.error("Login Failed.");
+                        $('#sso-login-btn').prop('disabled', false).text('Login with Website App');
+                    }
                 }
-                const { token } = await response.json();
-                alert("SSO Token received from website-app: " + token);
             }
         });
     </script>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
         $(document).ready(function() {
             // Check if token exists and is valid
@@ -191,4 +208,5 @@
     </script>
 
 </body>
+
 </html>

@@ -46,11 +46,15 @@
                     }
                 });
                 if (res.ok) {
+                    localStorage.removeItem('access_token');
                     toastr.success('Logout successfully.');
 
                     setTimeout(function() {
                         window.location.href = '/login';
                     }, 1500);
+                } else if (res.status == 401) {
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/login';
                 }
             });
         });
