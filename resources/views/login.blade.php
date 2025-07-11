@@ -42,6 +42,12 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-12 mb-4 text-center">
+                    <button id="sso-login-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                        Login with Website App
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -105,6 +111,53 @@
                 window.location.href = '/dashboard';
             }
         }
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#sso-login-btn').click(async function() {
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Redirecting...');
+
+                // Step 1: Initiate SSO from website-app
+                const response = await fetch('http://website-app.test/sso-initiate', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error("SSO Initiate Failed");
+                }
+
+                const {
+                    token
+                } = await response.json();
+                alert("SSO Token received from website-app:", token);
+
+                if (token) {
+                    throw new Error('Token received');
+                }
+
+                // Step 2: Continue with your software-app login flow
+                const loginResponse = await fetch('/api/sso-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    const error = await loginResponse.json();
+                    throw new Error(error.message || 'Login failed');
+                }
+
+                // Step 3: Redirect to dashboard on success
+                window.location.href = '/dashboard';
+            });
+        });
     </script>
 </body>
 

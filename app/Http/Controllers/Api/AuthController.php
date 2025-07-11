@@ -37,6 +37,12 @@ class AuthController extends Controller
     {
         if ($request->user()?->token()) {
             $request->user()->token()->revoke();
+
+            // $token = session('sso_access_token');
+            // if ($token) {
+            //     Http::withToken($token)->post('http://website-app.test/api/logout');
+            // }
+
             return response()->json(['message' => 'Token revoked']);
         }
         return response()->json(['message' => 'No token found'], 400);
